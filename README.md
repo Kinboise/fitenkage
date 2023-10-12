@@ -1,10 +1,10 @@
 # fitenkage
 
-用[https://www.npmjs.com/package/@kurgm/kage-engine](KAGE Engine)实现动态拉丁转特正文。
+用[KAGE Engine](https://www.npmjs.com/package/@kurgm/kage-engine)实现动态拉丁转特正文。
 
-Convert Latin to Fitenka. Based on [https://www.npmjs.com/package/@kurgm/kage-engine](KAGE Engine).
+Convert Latin to Fitenka. Based on [KAGE Engine](https://www.npmjs.com/package/@kurgm/kage-engine).
 
-e Fitenka fep ru "KAGE Engine".
+e Fitenka fep ru "[KAGE Engine](https://www.npmjs.com/package/@kurgm/kage-engine)".
 
 ## 用法/Usage
 
