@@ -181,16 +181,22 @@ function exportSVG(kage) {
 
 function latToFit(kage, lat) {
     if (lat.length == 1) {
-        if (lat == lat.toLowerCase()) {
+        if (lat == lat.toUpperCase()) {
             makeC(kage, lat.toLowerCase(), 'target')
         } else {
-            var tempId = makeC(kage, lat.toLowerCase())
-            shrink(kage, tempId, 120, 120, 'target')
+            var tempId = makeC(kage, lat)
+            if ('iuyw'.indexOf(lat) != -1) {
+                resize(kage, tempId, 40, 0, 160, 120, 'target')
+            } else if ('eao'.indexOf(lat) != -1) {
+                resize(kage, tempId, 40, 80, 160, 200, 'target')
+            } else {
+                shrink(kage, tempId, 120, 120, 'target')
+            }
         }
-    } else if (['nQ', 'dC', 'xZ'].indexOf(lat) != -1) {
-        makeC(kage, lat, 'target')
     } else if (['Nq', 'Dc', 'Xz'].indexOf(lat) != -1) {
-        var tempId = makeC(kage, changeCase(lat[0]))
+        makeC(kage, changeCase(lat), 'target')
+    } else if (['nQ', 'dC', 'xZ'].indexOf(lat) != -1) {
+        var tempId = makeC(kage, lat)
         shrink(kage, tempId, 120, 120, 'target')
     } else if (lat.search(/[IEAOUYW]/g) != -1) {
         lat = lat.replace(/([IEAOUYW])/g,'~$1~').replace(/~$/g,'').split('~')
@@ -231,7 +237,7 @@ function latToFit(kage, lat) {
         base = splitParts(base)
         if (base.indexOf('|') != -1) {
             var bar = true
-            base = base.pop()
+            base.pop()
         } else {
             var bar = false
         }
