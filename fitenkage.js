@@ -124,8 +124,11 @@ function addBar(kage, base, id) {
 function addAffix(kage, base, prefix, suffix, id) {
     id = genId(id)
     var ls = []
-    if (prefix.length + suffix.length < 3) {
-        var l = 60
+    if (prefix.length + suffix.length <= 1) {
+        var l = 70
+        var lb = 200 - l * (prefix.length + suffix.length)
+    } else if (prefix.length + suffix.length == 2) {
+        var l = 50
         var lb = 200 - l * (prefix.length + suffix.length)
     } else {
         var lb = 80
@@ -181,9 +184,45 @@ function exportSVG(kage) {
 
 function latToFit(kage, lat) {
     if (lat.length == 1) {
-        if (lat == lat.toUpperCase()) {
-            makeC(kage, lat.toLowerCase(), 'target')
+        // 标点符号独立处理
+        if (lat == ':') {
+            return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" baseProfile="full" viewBox="0 0 50 200" width="50" height="200">
+            <g fill="black">
+            <circle cx="25" cy="75" r="6" />
+            <circle cx="25" cy="125" r="6" />
+            </g>
+            </svg>`
+        } else if (lat == '·') {
+            return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" baseProfile="full" viewBox="0 0 50 200" width="50" height="200">
+            <g fill="black">
+            <circle cx="25" cy="100" r="6" />
+            </g>
+            </svg>`
+        } else if (lat == '-') {
+            return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" baseProfile="full" viewBox="0 0 100 200" width="100" height="200">
+            <g fill="black">
+            <rect x="15" y="97" height="6" width="70" />
+            </g>
+            </svg>`
+        } else if (lat == ',') {
+            return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" baseProfile="full" viewBox="0 0 100 200" width="100" height="200">
+            <g fill="black">
+            <rect x="47" y="0" height="200" width="6" />
+            </g>
+            </svg>`
+        // } else if (lat == '.') {
+        //     return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" baseProfile="full" viewBox="0 0 100 200" width="100" height="200">
+        //     <g fill="black">
+        //     <rect x="37" y="0" height="200" width="6" />
+        //     <rect x="57" y="0" height="200" width="6" />
+        //     </g>
+        //     </svg>`
+        } else if (lat == lat.toUpperCase()) {
+            // 大写单辅音字母
+            var tempId = makeC(kage, lat.toLowerCase())
+            shrink(kage, tempId, 160, 160, 'target')
         } else {
+            // 小写单辅音字母
             var tempId = makeC(kage, lat)
             if ('iuyw'.indexOf(lat) != -1) {
                 resize(kage, tempId, 40, 0, 160, 120, 'target')
@@ -193,37 +232,75 @@ function latToFit(kage, lat) {
                 shrink(kage, tempId, 120, 120, 'target')
             }
         }
+    } else if (lat == ',,') {
+        return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" baseProfile="full" viewBox="0 0 100 200" width="100" height="200">
+        <g fill="black">
+        <rect x="37" y="0" height="200" width="6" />
+        <rect x="57" y="0" height="200" width="6" />
+        </g>
+        </svg>`
     } else if (['Nq', 'Dc', 'Xz'].indexOf(lat) != -1) {
-        makeC(kage, changeCase(lat), 'target')
+        // 大写二合辅音字母
+        var tempId = makeC(kage, changeCase(lat))
+        shrink(kage, tempId, 160, 160, 'target')
     } else if (['nQ', 'dC', 'xZ'].indexOf(lat) != -1) {
+        // 小写二合辅音字母
         var tempId = makeC(kage, lat)
         shrink(kage, tempId, 120, 120, 'target')
     } else if (lat.search(/[IEAOUYW]/g) != -1) {
+        // 大写音节
+        if (lat.search('`') != -1) {
+            lat = lat.split('`')
+            var affix = lat[1]
+            var hasAffix = true
+            lat = lat[0]
+        } else {
+            var hasAffix = false
+        }
+        // 切成声母、韵腹、韵尾
         lat = lat.replace(/([IEAOUYW])/g,'~$1~').replace(/~$/g,'').split('~')
         for (var i in lat) {
+            // 是否辅音
             var temp = lat[i].match(/[QHPBTDKGCJSZFVMNLRX]/g)
             if (temp != null && temp.length > 1) {
+                // 复辅音
                 lat[i] = makeC(kage, changeCase(lat[i]))
             } else {
+                // 单辅音或元音
                 lat[i] = changeCase(lat[i])
             }
         }
         if (lat.length == 2) {
+            // 声+腹，无韵尾
             if ('iuyw'.indexOf(lat[1]) != -1) {
-                kage.kBuhin.push('target',`99:0:0:60:0:140:80:${lat[1]}$99:0:0:40:80:160:200:${lat[0]}`)
+                // 元音在上
+                if (hasAffix) {
+                    kage.kBuhin.push('target',`99:0:0:20:0:100:80:${lat[1]}$99:0:0:0:80:120:200:${lat[0]}$99:0:0:120:0:200:200:${affix}`)
+                } else {
+                    kage.kBuhin.push('target',`99:0:0:60:0:140:80:${lat[1]}$99:0:0:40:80:160:200:${lat[0]}`)
+                }
             } else {
-                kage.kBuhin.push('target',`99:0:0:60:120:140:200:${lat[1]}$99:0:0:40:0:160:120:${lat[0]}`)
+                // 元音在下
+                if (hasAffix) {
+                    kage.kBuhin.push('target',`99:0:0:20:120:100:200:${lat[1]}$99:0:0:0:0:120:120:${lat[0]}$99:0:0:120:0:200:200:${affix}`)
+                } else {
+                    kage.kBuhin.push('target',`99:0:0:60:120:140:200:${lat[1]}$99:0:0:40:0:160:120:${lat[0]}`)
+                }
             }
         } else {
+            // 有韵尾
             if ('iuyw'.indexOf(lat[1]) != -1) {
+                // 元音在上
                 kage.kBuhin.push('target',`99:0:0:70:0:130:60:${lat[1]}$99:0:0:40:60:160:130:${lat[0]}$99:0:0:40:130:160:200:${lat[2]}`)
             } else {
+                // 元音在下
                 kage.kBuhin.push('target',`99:0:0:70:70:130:130:${lat[1]}$99:0:0:40:0:160:70:${lat[0]}$99:0:0:40:130:160:200:${lat[2]}`)
             }
         }
     } else {
         // const c = ['q', 'h', 'p', 'b', 't', 'd', 'k', 'g', 'c', 'j', 's', 'z', 'f', 'v', 'm', 'n', 'l', 'r', 'nQ', 'dC', 'x', 'xZ']
         const v = ['i', 'e', 'a', 'o', 'u', 'y', 'w']
+        // 分出词缀
         lat = lat.split('`')
         for (var i in lat) {
             var cons = lat[i].match(/[qhpbtdkgcjszfvmnlrx]/g)
@@ -265,7 +342,8 @@ function latToFit(kage, lat) {
         if (bar) {
             res = addBar(kage, 'base')
         }
-        addAffix(kage, res, prefix, suffix, 'target')
+        var tempId = addAffix(kage, res, prefix, suffix)
+        shrink(kage, tempId, 160, 200, 'target')
     }
     return exportSVG(kage)
 }

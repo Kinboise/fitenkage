@@ -17,23 +17,28 @@ def batchGen(codeMap):
     for i in codeMap:
         path = 'svg/' + i + '.svg'
         lat = codeMap[i]
-        if int(i, 16) % 16 == 0:
+        if int(i, 16) % 32 == 0:
             print(path)
         sp.run(['node','index.js', path, lat])
 
 # 导入
 
-def makeFont(fontFile):
+def makeFont(fontFile, codeMap=None):
     import fontforge as ff
     # font = ff.open(fontFile)
     font = ff.font()
     import os
-    svgs = os.listdir('svg/')
-
+    if codeMap is None:
+        svgs = os.listdir('svg/')
+    else:
+        svgs = [f'{x}.svg' for x in codeMap.keys()]
     for svg in svgs:
         glyph = font.createChar(int(svg[0:-4], 16))
-        glyph.importOutlines('svg/' + svg)
+        glyph.importOutlines(f'svg/{svg}')
+        glyph.width = 1000
+        # glyph.genericGlyphChange(stemScale=1.0, hCounterType='center')
         glyph.removeOverlap()
         glyph.correctDirection()
         glyph.addExtrema('all')
+        glyph.round()
     font.save(fontFile)

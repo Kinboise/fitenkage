@@ -1,4 +1,8 @@
 node_modules/
 svg/
-__pycache__/
 *.svg
+__pycache__/
+.parcel-cache/
+.vscode/
+dist/
+src/
